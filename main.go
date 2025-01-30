@@ -71,16 +71,16 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+		outputFilename := strings.TrimSuffix(f.Name(), ".md") + ".html"
 
 		post := Post{
 			Title:    strings.TrimSuffix(f.Name(), ".md"),
 			Content:  content,
-			Filename: f.Name(),
+			Filename: outputFilename,
 		}
 
 		posts = append(posts, post)
 
-		outputFilename := strings.TrimSuffix(f.Name(), ".md") + ".html"
 		outputPath := filepath.Join(outputDir, outputFilename)
 		outFile, _ := os.Create(outputPath)
 		defer outFile.Close()
