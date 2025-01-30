@@ -2,13 +2,9 @@ package main
 
 import (
 	"html/template"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"sort"
-	"strings"
 
-	"github.com/yuin/goldmark"
+	"github.com/breno5g/go-blog/config"
+	"github.com/breno5g/go-blog/internal/entity"
 )
 
 type Post struct {
@@ -17,83 +13,90 @@ type Post struct {
 	Filename string
 }
 
-var (
-	postsDir     = "posts"
-	outputDir    = "public"
-	templatesDir = "templates"
+// var (
+// 	templatesDir = "templates"
 
-	postTemplate  = template.Must(template.ParseFiles(filepath.Join(templatesDir, "post.html")))
-	indexTemplate = template.Must(template.ParseFiles(filepath.Join(templatesDir, "index.html")))
-)
+// 	postTemplate  = template.Must(template.ParseFiles(filepath.Join(templatesDir, "post.html")))
+// 	indexTemplate = template.Must(template.ParseFiles(filepath.Join(templatesDir, "index.html")))
+// )
 
-func init() {
-	if err := os.MkdirAll(outputDir, 0755); err != nil {
-		panic(err)
-	}
-}
+// func init() {
+// 	if err := os.MkdirAll(outputDir, 0755); err != nil {
+// 		panic(err)
+// 	}
+// }
 
-func convertMDtoHTML(inputPath string) (template.HTML, error) {
-	content, err := os.ReadFile(inputPath)
-	if err != nil {
-		return "", err
-	}
+// func convertMDtoHTML(inputPath string) (template.HTML, error) {
+// 	content, err := os.ReadFile(inputPath)
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	var htmlContent strings.Builder
-	goldmark.Convert(content, &htmlContent)
+// 	var htmlContent strings.Builder
+// 	goldmark.Convert(content, &htmlContent)
 
-	return template.HTML(htmlContent.String()), nil
-}
+// 	return template.HTML(htmlContent.String()), nil
+// }
 
-func sortFilesByCreationTime(files []os.FileInfo) {
-	sort.Slice(files, func(i, j int) bool {
-		return files[i].ModTime().After(files[j].ModTime())
-	})
-}
+// func sortFilesByCreationTime(files []os.FileInfo) {
+// 	sort.Slice(files, func(i, j int) bool {
+// 		return files[i].ModTime().After(files[j].ModTime())
+// 	})
+// }
 
 func main() {
-	var posts []Post
-	files, err := ioutil.ReadDir(postsDir)
-	if err != nil {
-		panic(err)
+	// var posts []Post
+	// files, err := ioutil.ReadDir(postsDir)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	paths := config.GetPaths()
+
+	posts := entity.Posts{
+		InputPath: paths.PostsDir,
+		OutputDir: paths.OutputDir,
+		Logger:    config.GetLogger("POSTS"),
 	}
 
-	sortFilesByCreationTime(files)
+	posts.Set()
 
-	for _, f := range files {
-		if f.IsDir() || !strings.HasSuffix(f.Name(), ".md") {
-			continue
-		}
+	// sortFilesByCreationTime(files)
 
-		inputPath := filepath.Join(postsDir, f.Name())
+	// for _, f := range files {
+	// 	if f.IsDir() || !strings.HasSuffix(f.Name(), ".md") {
+	// 		continue
+	// 	}
 
-		content, err := convertMDtoHTML(inputPath)
+	// 	inputPath := filepath.Join(postsDir, f.Name())
 
-		if err != nil {
-			panic(err)
-		}
-		outputFilename := strings.TrimSuffix(f.Name(), ".md") + ".html"
+	// 	content, err := convertMDtoHTML(inputPath)
 
-		post := Post{
-			Title:    strings.TrimSuffix(f.Name(), ".md"),
-			Content:  content,
-			Filename: outputFilename,
-		}
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	outputFilename := strings.TrimSuffix(f.Name(), ".md") + ".html"
 
-		posts = append(posts, post)
+	// 	post := Post{
+	// 		Title:    strings.TrimSuffix(f.Name(), ".md"),
+	// 		Content:  content,
+	// 		Filename: outputFilename,
+	// 	}
 
-		outputPath := filepath.Join(outputDir, outputFilename)
-		outFile, _ := os.Create(outputPath)
-		defer outFile.Close()
-		postTemplate.Execute(outFile, post)
-	}
+	// 	posts = append(posts, post)
 
-	indexFile, err := os.Create(filepath.Join(outputDir, "index.html"))
+	// 	outputPath := filepath.Join(outputDir, outputFilename)
+	// 	outFile, _ := os.Create(outputPath)
+	// 	defer outFile.Close()
+	// 	postTemplate.Execute(outFile, post)
+	// }
 
-	if err != nil {
-		panic(err)
-	}
+	// indexFile, err := os.Create(filepath.Join(outputDir, "index.html"))
 
-	defer indexFile.Close()
-	indexTemplate.Execute(indexFile, posts)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// defer indexFile.Close()
+	// indexTemplate.Execute(indexFile, posts)
 
 }
