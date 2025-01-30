@@ -45,11 +45,6 @@ type Post struct {
 // }
 
 func main() {
-	// var posts []Post
-	// files, err := ioutil.ReadDir(postsDir)
-	// if err != nil {
-	// 	panic(err)
-	// }
 	paths := config.GetPaths()
 
 	posts := entity.Posts{

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/breno5g/go-blog/config"
+	"github.com/breno5g/go-blog/internal/helpers"
 )
 
 type Post struct {
@@ -34,7 +35,20 @@ func (p *Posts) Set() {
 			continue
 		}
 
-		fmt.Println(f.Name())
+		inputPath := fmt.Sprintf("%s/%s", p.InputPath, f.Name())
+		outputFilename := strings.TrimSuffix(f.Name(), ".md") + ".html"
+
+		content, err := helpers.ConvertMDtoHTML(inputPath)
+		if err != nil {
+			p.Logger.Errorf("Error converting MD to HTML: %v", err)
+			panic(err)
+		}
+
+		p.Posts = append(p.Posts, Post{
+			Title:    strings.TrimSuffix(f.Name(), ".md"),
+			Content:  content,
+			Filename: outputFilename,
+		})
 	}
 }
 
