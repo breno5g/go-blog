@@ -3,9 +3,13 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
+
+	"github.com/yuin/goldmark"
 )
 
 type Post struct {
@@ -29,27 +33,57 @@ func init() {
 	}
 }
 
+func convertMDtoHTML(inputPath string) (template.HTML, error) {
+	content, err := os.ReadFile(inputPath)
+	if err != nil {
+		return "", err
+	}
+
+	var htmlContent strings.Builder
+	goldmark.Convert(content, &htmlContent)
+
+	return template.HTML(htmlContent.String()), nil
+}
+
+func sortFilesByCreationTime(files []os.FileInfo) {
+	sort.Slice(files, func(i, j int) bool {
+		return files[i].ModTime().After(files[j].ModTime())
+	})
+}
+
 func main() {
 	var posts []Post
-	files, err := os.ReadDir(postsDir)
+	files, err := ioutil.ReadDir(postsDir)
 	if err != nil {
 		panic(err)
 	}
+
+	sortFilesByCreationTime(files)
 
 	for _, f := range files {
 		if f.IsDir() || !strings.HasSuffix(f.Name(), ".md") {
 			continue
 		}
 
+		inputPath := filepath.Join(postsDir, f.Name())
+
+		content, err := convertMDtoHTML(inputPath)
+
+		if err != nil {
+			panic(err)
+		}
+
 		post := Post{
 			Title:    strings.TrimSuffix(f.Name(), ".md"),
-			Filename: filepath.Join(postsDir, f.Name()),
+			Content:  content,
+			Filename: f.Name(),
 		}
 
 		posts = append(posts, post)
 	}
 
 	for _, post := range posts {
-		fmt.Println(post.Filename)
+		fmt.Println(post)
 	}
+
 }
