@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"io/ioutil"
 	"os"
@@ -80,10 +79,21 @@ func main() {
 		}
 
 		posts = append(posts, post)
+
+		outputFilename := strings.TrimSuffix(f.Name(), ".md") + ".html"
+		outputPath := filepath.Join(outputDir, outputFilename)
+		outFile, _ := os.Create(outputPath)
+		defer outFile.Close()
+		postTemplate.Execute(outFile, post)
 	}
 
-	for _, post := range posts {
-		fmt.Println(post)
+	indexFile, err := os.Create(filepath.Join(outputDir, "index.html"))
+
+	if err != nil {
+		panic(err)
 	}
+
+	defer indexFile.Close()
+	indexTemplate.Execute(indexFile, posts)
 
 }
