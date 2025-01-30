@@ -23,6 +23,12 @@ var (
 	indexTemplate = template.Must(template.ParseFiles(filepath.Join(templatesDir, "index.html")))
 )
 
+func init() {
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	var posts []Post
 	files, err := os.ReadDir(postsDir)
