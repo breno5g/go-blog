@@ -22,7 +22,7 @@ jobs:
         run: go mod tidy 
 
       - name: Run script to generate static files
-        run: go run main.go 
+        run: go run cmd/blog/main.go 
 
       - name: Configure Git
         run: |
