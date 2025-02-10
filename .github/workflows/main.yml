@@ -35,6 +35,6 @@ jobs:
           github_token: ${{ secrets.GH_PAGES }}
           publish_dir: ./public 
           publish_branch: gh-pages
-          cname: blog.breno5g.com
+          cname: blog.breno5g.dev
           enable_jekyll: true
 
