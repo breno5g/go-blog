@@ -22,7 +22,12 @@ jobs:
         run: go mod tidy 
 
       - name: Run script to generate static files
-        run: go run cmd/blog/main.go 
+        run: go run cmd/blog/main.go
+
+      - name: Set assets directory
+        run: |
+          mkdir -p public/assets
+          cp -r assets/* public/assets
 
       - name: Configure Git
         run: |
