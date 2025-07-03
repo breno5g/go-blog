@@ -1,3 +1,0 @@
-# Test
-
-texto de teste
