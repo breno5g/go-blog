@@ -9,6 +9,7 @@ languageCode = "en-US"
 copyright = "Breno Santos"
 
 enableRobotsTXT = true
+hideUntranslated = false
 
 [markup]
   [markup.highlight]
@@ -33,18 +34,22 @@ enableRobotsTXT = true
 
   [languages.en]
     languageName = "en-US 🇺🇸"
+    LanguageCode = "en-US"
     weight = 1
     contentDir = "content.en"
     title = "Blog | Breno5G"
 
     [languages.en.params]
       madeWith = "Made with [Bear Cub](https://github.com/clente/hugo-bearcub)"
+      description = "A personal diary about software, programming, and ideas in progress."
 
   [languages.pt]
     languageName = "pt-BR 🇧🇷"
+    LanguageCode = "pt-BR"
     weight = 2
-    contentDir = "content"
+    contentDir = "content.pt"
     title = "Blog | Breno5G"
 
     [languages.pt.params]
       madeWith = "Feito com [Bear Cub](https://github.com/clente/hugo-bearcub)"
+      description = "Um diário pessoal sobre programação, engenharia de software e ideias em andamento."
