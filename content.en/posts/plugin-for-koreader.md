@@ -295,4 +295,3 @@ Here we grab all the _metadata_ and, with the user's saved settings, communicate
 
 # Conclusion
 We've reached the end of the _plugin_ development (at least the KoReader part) and the complete code is available on my _github_ in the [koreadersync.koplugin](https://github.com/breno5g/koreadersync.koplugin) repository.
-```
