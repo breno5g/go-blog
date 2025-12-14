@@ -1,7 +1,7 @@
 ---
 title: "Plugin For KoReader"
 date: 2025-12-14T18:00:34-03:00
-draft: true
+draft: false
 description: "Follow along as I build a plugin for KoReader"
 tags: ["books", "code"]
 categories: []
