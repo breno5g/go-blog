@@ -6,10 +6,10 @@ weight: 1
 
 # ¯⁠\⁠_⁠(⁠ツ⁠)⁠_⁠/⁠¯
 
-A web ficou barulhenta demais. Tudo parece pesado, apressado e excessivamente elaborado, mesmo quando a ideia é simples. Em algum ponto, escrever e pensar ficaram em segundo plano.
+The web got too noisy. Everything feels heavy, rushed, and overly elaborate, even when the idea is simple. Somewhere along the way, writing and thinking took a back seat.
 
-Este site existe como um contraponto pequeno e pessoal a isso. Um lugar para escrever devagar, sem a obrigação de ensinar ou convencer alguém. Às vezes sobre programação e engenharia de software, às vezes só sobre o que estou tentando entender no momento.
+This site exists as a small, personal counterpoint to that. A place to write slowly, without the obligation to teach or convince anyone. Sometimes about programming and software engineering, sometimes just about what I'm trying to understand at the moment.
 
-Não é um portfólio, nem um manifesto, nem uma vitrine. É um diário público, simples e direto, feito para organizar ideias, guardar aprendizados e deixar rastros do caminho. Parte disso também acaba indo parar no código — que vive por lá: [github.com/breno5g](https://github.com/breno5g).
+It's not a portfolio, not a manifesto, not a showcase. It's a public diary, simple and straightforward, made to organize ideas, keep track of what I learn, and leave traces of the path. Part of this also ends up in code — which lives over there: [github.com/breno5g](https://github.com/breno5g).
 
-Fique à vontade 👋
+Feel free to look around 👋
