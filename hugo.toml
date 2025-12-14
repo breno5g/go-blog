@@ -2,9 +2,9 @@ baseURL = "https://blog.breno5g.dev/"
 title = "Blog | Breno5G"
 theme = "hugo-bearcub"
 
-defaultContentLanguage = "en"
+defaultContentLanguage = "pt"
 defaultContentLanguageInSubdir = false
-languageCode = "en-US"
+languageCode = "pt-BR"
 
 copyright = "Breno Santos"
 
