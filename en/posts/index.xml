@@ -1,1 +1,267 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on Blog | Breno5G</title><link>https://blog.breno5g.dev/en/posts/</link><description>Recent content in Posts on Blog | Breno5G</description><generator>Hugo -- gohugo.io</generator><language>en-US</language><copyright>Breno Santos</copyright><lastBuildDate>Sun, 14 Dec 2025 18:00:34 -0300</lastBuildDate><atom:link href="https://blog.breno5g.dev/en/posts/index.xml" rel="self" type="application/rss+xml"/></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Posts on Blog | Breno5G</title><link>https://blog.breno5g.dev/en/posts/</link><description>Recent content in Posts on Blog | Breno5G</description><generator>Hugo -- gohugo.io</generator><language>en-US</language><copyright>Breno Santos</copyright><lastBuildDate>Sun, 14 Dec 2025 18:00:34 -0300</lastBuildDate><atom:link href="https://blog.breno5g.dev/en/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Plugin For KoReader</title><link>https://blog.breno5g.dev/en/posts/plugin-for-koreader/</link><pubDate>Sun, 14 Dec 2025 18:00:34 -0300</pubDate><guid>https://blog.breno5g.dev/en/posts/plugin-for-koreader/</guid><description>&lt;h1 id="the-problem">The problem&lt;/h1>
+&lt;p>I recently decided to get back to studying, both to improve my programming skills and to continue my personal development.&lt;br>
+Some friends recommended books on psychology, philosophy, and other topics that caught my interest — and, of course, I kept adding everything to my Kindle.&lt;/p>
+&lt;p>My idea was simple: read on the Kindle, highlight the important parts, and automatically send those annotations to my &lt;strong>Obsidian vault&lt;/strong>, where I keep all my studies and notes. That way I could easily revisit the most striking concepts from each book.&lt;/p></description><content:encoded><![CDATA[<h1 id="the-problem">The problem</h1>
+<p>I recently decided to get back to studying, both to improve my programming skills and to continue my personal development.<br>
+Some friends recommended books on psychology, philosophy, and other topics that caught my interest — and, of course, I kept adding everything to my Kindle.</p>
+<p>My idea was simple: read on the Kindle, highlight the important parts, and automatically send those annotations to my <strong>Obsidian vault</strong>, where I keep all my studies and notes. That way I could easily revisit the most striking concepts from each book.</p>
+<p>But then came the problem.<br>
+My plan was to use <strong>Readwise</strong> to capture the highlights and send them to Obsidian through a simple plugin.<br>
+To my unpleasant surprise, I discovered that Readwise <strong>doesn&rsquo;t capture highlights from books manually added to the Kindle</strong> — only those purchased from the Amazon store.</p>
+<p>And I knew the highlights existed, because they showed up normally when I opened the book in the official app.</p>
+<h1 id="the-solution">The solution</h1>
+<p>I could have just given up on automation and kept copying everything manually.<br>
+Or I could have looked for some third-party tool to solve the problem.<br>
+But I decided to go another route: <strong>completely abandon Amazon&rsquo;s closed ecosystem</strong>, jailbreak my Kindle, and create my own solution.</p>
+<p>After some research on jailbreaking, I ended up finding an article about <strong>KOReader</strong> — an <em>open source</em> document reader for <em>e-ink</em> devices, with plugin support and extensive customization. Exactly what I was looking for.</p>
+<p>With the Kindle soul freed, I installed KOReader and started looking for documentation on how to develop plugins.<br>
+But, to my surprise, <strong>there was no &ldquo;getting started&rdquo;</strong> — not even a search bar to find functions in the wiki.</p>
+<p>In other words: if I wanted to make this work, I&rsquo;d have to explore the source code and learn how the ancients did it.</p>
+<h1 id="the-action-plan">The action plan</h1>
+<p>Before diving into the code, I decided to define the basic requirements for how this plugin should behave.</p>
+<p>The basic idea is that the plugin should:</p>
+<ul>
+<li>Fetch the <strong>highlights</strong> from the currently open book;</li>
+<li>Read the saved content;</li>
+<li>Send it to an <strong>HTTP server</strong> that should handle it appropriately.</li>
+</ul>
+<p>This way the plugin can communicate with any server that has a route to handle this.</p>
+<p>For the visual part, we need:</p>
+<ul>
+<li>A <strong>form</strong> where the user can enter the IP and port where the server will be running;</li>
+<li>A <strong>button</strong> to trigger the sync event;</li>
+<li>And, of course, a <strong>debug button</strong>.</li>
+</ul>
+<h1 id="getting-hands-dirty">Getting hands dirty</h1>
+<p>As a starting point, I chose two native KOReader plugins as a base:</p>
+<ul>
+<li>The <em>Calibre</em> one, which would give me a foundation for how to display components on screen;</li>
+<li>And the <em>Exporter</em>, which is a plugin already designed to handle highlights.</li>
+</ul>
+<p>The first task was to figure out how to start the plugin and show a simple &ldquo;Hello world&rdquo; on screen — and for that, the structure below was necessary:</p>
+
+
+
+
+
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="kd">local</span> <span class="n">InfoMessage</span> <span class="o">=</span> <span class="n">require</span><span class="p">(</span><span class="s2">&#34;ui/widget/infomessage&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">local</span> <span class="n">UIManager</span> <span class="o">=</span> <span class="n">require</span><span class="p">(</span><span class="s2">&#34;ui/uimanager&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="kd">local</span> <span class="n">WidgetContainer</span> <span class="o">=</span> <span class="n">require</span><span class="p">(</span><span class="s2">&#34;ui/widget/container/widgetcontainer&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="kd">local</span> <span class="n">_</span> <span class="o">=</span> <span class="n">require</span><span class="p">(</span><span class="s2">&#34;gettext&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="kd">local</span> <span class="n">ObsidianSync</span> <span class="o">=</span> <span class="n">WidgetContainer</span><span class="p">:</span><span class="n">extend</span><span class="p">({</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">	<span class="n">name</span> <span class="o">=</span> <span class="s2">&#34;obsidiansync&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">	<span class="n">is_doc_only</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="p">})</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">
+</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="kr">function</span> <span class="nc">ObsidianSync</span><span class="p">:</span><span class="nf">init</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">	<span class="n">self.ui</span><span class="p">.</span><span class="n">menu</span><span class="p">:</span><span class="n">registerToMainMenu</span><span class="p">(</span><span class="n">self</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="kr">end</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">
+</span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="kr">function</span> <span class="nc">ObsidianSync</span><span class="p">:</span><span class="nf">addToMainMenu</span><span class="p">(</span><span class="n">menu_items</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">	<span class="n">menu_items.obsidiansync</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">		<span class="n">text</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&#34;Obsidian Sync&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl">		<span class="n">sorting_hint</span> <span class="o">=</span> <span class="s2">&#34;tools&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">		<span class="n">sub_item_table</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">			<span class="p">{</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">				<span class="n">text</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&#34;Export Highlights&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">				<span class="n">callback</span> <span class="o">=</span> <span class="kr">function</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">					<span class="n">UIManager</span><span class="p">:</span><span class="n">show</span><span class="p">(</span><span class="n">InfoMessage</span><span class="p">:</span><span class="n">new</span><span class="p">({</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">						<span class="n">text</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&#34;Hello, plugin world&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl">					<span class="p">}))</span>
+</span></span><span class="line"><span class="ln">26</span><span class="cl">				<span class="kr">end</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">27</span><span class="cl">			<span class="p">},</span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl">		<span class="p">},</span>
+</span></span><span class="line"><span class="ln">29</span><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="kr">end</span>
+</span></span><span class="line"><span class="ln">31</span><span class="cl">
+</span></span><span class="line"><span class="ln">32</span><span class="cl"><span class="kr">return</span> <span class="n">ObsidianSync</span></span></span></code></pre></div><p>Roughly explaining this code:<br>
+we initialized a class called <strong><code>ObsidianSync</code></strong>, which inherits from the <strong><code>WidgetContainer</code></strong> class all the basic methods and attributes we need to create a <em>plugin/widget</em> in KOReader.</p>
+<p>We also created an <strong><code>init</code></strong> method, which will be called when the app starts and will be responsible for adding the plugin to the interface.</p>
+<p>Finally, we created the <strong><code>addToMainMenu</code></strong> method which, as the name suggests, is responsible for adding the plugin&rsquo;s visual elements to the menu.</p>
+<h2 id="event-to-capture-basic-information">Event to capture basic information</h2>
+<p>After creating the basic plugin structure, I needed to figure out how to capture the basic information from the book we&rsquo;re working with, things like title, number of pages, reading progress, and, just as important, the <strong>highlights</strong>.</p>
+<p>So, to start this part, I decided to create a <strong><code>debug</code></strong> method that would return the basic information about which book we&rsquo;re on, what its extension is, and in which directory it&rsquo;s located.</p>
+
+
+
+
+
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="kr">function</span> <span class="nc">ObsidianSync</span><span class="p">:</span><span class="nf">getFileNameAndExtension</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">	<span class="kd">local</span> <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">		<span class="n">dirname</span> <span class="o">=</span> <span class="n">path</span><span class="p">:</span><span class="n">match</span><span class="p">(</span><span class="s2">&#34;(.+)/[^/]+$&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">		<span class="n">filename</span> <span class="o">=</span> <span class="n">path</span><span class="p">:</span><span class="n">match</span><span class="p">(</span><span class="s2">&#34;([^/]+)%.&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">		<span class="n">extension</span> <span class="o">=</span> <span class="n">path</span><span class="p">:</span><span class="n">match</span><span class="p">(</span><span class="s2">&#34;%.([^%.]+)$&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">	<span class="kr">return</span> <span class="n">info</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="kr">end</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">
+</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="kr">function</span> <span class="nc">ObsidianSync</span><span class="p">:</span><span class="nf">debug</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">	<span class="kd">local</span> <span class="n">info</span> <span class="o">=</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">
+</span></span><span class="line"><span class="ln">14</span><span class="cl">	<span class="n">table.insert</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s2">&#34;====== DEBUG INFO ======&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">	<span class="n">table.insert</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">
+</span></span><span class="line"><span class="ln">17</span><span class="cl">	<span class="kr">if</span> <span class="ow">not</span> <span class="n">self.ui</span><span class="p">.</span><span class="n">document</span> <span class="kr">then</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl">		<span class="n">table.insert</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s2">&#34;❌ Open a document to proced&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">		<span class="n">self</span><span class="p">:</span><span class="n">info</span><span class="p">(</span><span class="n">table.concat</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">))</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">		<span class="kr">return</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">	<span class="kr">end</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">
+</span></span><span class="line"><span class="ln">23</span><span class="cl">	<span class="kd">local</span> <span class="n">fileInfo</span> <span class="o">=</span> <span class="n">self</span><span class="p">:</span><span class="n">getFileNameAndExtension</span><span class="p">(</span><span class="n">self.ui</span><span class="p">.</span><span class="n">document.file</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">	<span class="n">table.insert</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s2">&#34;✅ Document infos:&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl">	<span class="n">table.insert</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s2">&#34;- Dirname: &#34;</span> <span class="o">..</span> <span class="n">fileInfo.dirname</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">26</span><span class="cl">	<span class="n">table.insert</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s2">&#34;- Filename: &#34;</span> <span class="o">..</span> <span class="n">fileInfo.filename</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">27</span><span class="cl">	<span class="n">table.insert</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s2">&#34;- Extension: &#34;</span> <span class="o">..</span> <span class="n">fileInfo.extension</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl">
+</span></span><span class="line"><span class="ln">29</span><span class="cl">	<span class="n">self</span><span class="p">:</span><span class="n">info</span><span class="p">(</span><span class="n">table.concat</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">))</span>
+</span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="kr">end</span></span></span></code></pre></div><p>There&rsquo;s probably a simpler approach to get the book data, but nothing that a <code>regex</code> and some willpower can&rsquo;t solve.</p>
+<h2 id="accessing-the-highlights">Accessing the highlights</h2>
+<p>Now that we have access to the most basic information about the current book, we need to figure out where KoReader saves the information we want from the book.</p>
+<p>After a few minutes of research and testing, I ended up seeing that in the same folder where the book is saved, another folder called <em>filename.sdr</em> is generated, and in that folder, a file <em>metadata.{book extension}.lua</em> is created that contains all the basic information about the book.</p>
+<p>Analyzing the metadata file, I found the <em>annotation</em> key that contains all the saved <strong>highlights</strong> and their information.</p>
+
+
+
+
+
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="kr">function</span> <span class="nc">ObsidianSync</span><span class="p">:</span><span class="nf">getSDRData</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">	<span class="kr">if</span> <span class="ow">not</span> <span class="n">self.ui</span><span class="p">.</span><span class="n">document</span> <span class="kr">then</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">		<span class="n">self</span><span class="p">:</span><span class="n">info</span><span class="p">(</span><span class="s2">&#34;❌ Open a document to proced&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">		<span class="kr">return</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">	<span class="kr">end</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">	<span class="kd">local</span> <span class="n">fileInfo</span> <span class="o">=</span> <span class="n">self</span><span class="p">:</span><span class="n">getFileNameAndExtension</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">	<span class="kd">local</span> <span class="n">chunk</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">		<span class="n">loadfile</span><span class="p">(</span><span class="n">fileInfo.dirname</span> <span class="o">..</span> <span class="s2">&#34;/&#34;</span> <span class="o">..</span> <span class="n">fileInfo.filename</span> <span class="o">..</span> <span class="s2">&#34;.sdr/metadata.&#34;</span> <span class="o">..</span> <span class="n">fileInfo.extension</span> <span class="o">..</span> <span class="s2">&#34;.lua&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">	<span class="kr">if</span> <span class="ow">not</span> <span class="n">chunk</span> <span class="kr">then</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">		<span class="n">self</span><span class="p">:</span><span class="n">info</span><span class="p">(</span><span class="s2">&#34;❌ Error to open sdr: &#34;</span> <span class="o">..</span> <span class="n">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">		<span class="kr">return</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">	<span class="kr">end</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">
+</span></span><span class="line"><span class="ln">15</span><span class="cl">	<span class="kd">local</span> <span class="n">metadata</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">	<span class="n">self</span><span class="p">:</span><span class="n">info</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&#34;annotations&#34;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="s2">&#34;text&#34;</span><span class="p">])</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="kr">end</span></span></span></code></pre></div><h2 id="designing-server-communication">Designing server communication</h2>
+<p>Now that we have the data we need, we just need to be able to communicate with the server and send the files.</p>
+<p>I thought of N ways we could make this connection, but I decided to focus on the basics first and then improve it if necessary. So, to start, we just need the <strong><code>IP</code></strong> of the machine where the server will be running and the <strong><code>PORT</code></strong> where the service will be listening.</p>
+<p>Before trying to communicate with the server, I decided to create a basic configuration file so the user can fill in this information once and reuse it in future reading sessions.</p>
+
+
+
+
+
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="kd">local</span> <span class="n">ObsidianSync</span> <span class="o">=</span> <span class="n">WidgetContainer</span><span class="p">:</span><span class="n">extend</span><span class="p">({</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">	<span class="n">name</span> <span class="o">=</span> <span class="s2">&#34;obsidiansync&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">	<span class="n">is_doc_only</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">	<span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">		<span class="n">address</span> <span class="o">=</span> <span class="s2">&#34;127.0.0.1&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">		<span class="n">port</span> <span class="o">=</span> <span class="mi">9090</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">		<span class="n">password</span> <span class="o">=</span> <span class="s2">&#34;&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">	<span class="p">},</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="p">})</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">
+</span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="kr">function</span> <span class="nc">ObsidianSync</span><span class="p">:</span><span class="nf">configure</span><span class="p">(</span><span class="n">touchmenu_instance</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">	<span class="kd">local</span> <span class="n">MultiInputDialog</span> <span class="o">=</span> <span class="n">require</span><span class="p">(</span><span class="s2">&#34;ui/widget/multiinputdialog&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">	<span class="kd">local</span> <span class="n">url_dialog</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">
+</span></span><span class="line"><span class="ln">16</span><span class="cl">	<span class="kd">local</span> <span class="n">current_settings</span> <span class="o">=</span> <span class="n">self.settings</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">		<span class="ow">or</span> <span class="n">G_reader_settings</span><span class="p">:</span><span class="n">readSetting</span><span class="p">(</span><span class="s2">&#34;obsidiansync_settings&#34;</span><span class="p">,</span> <span class="n">ObsidianSync.defaults</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl">
+</span></span><span class="line"><span class="ln">19</span><span class="cl">	<span class="kd">local</span> <span class="n">obsidian_url_address</span> <span class="o">=</span> <span class="n">current_settings.address</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">	<span class="kd">local</span> <span class="n">obsidian_url_port</span> <span class="o">=</span> <span class="n">current_settings.port</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">
+</span></span><span class="line"><span class="ln">22</span><span class="cl">	<span class="n">url_dialog</span> <span class="o">=</span> <span class="n">MultiInputDialog</span><span class="p">:</span><span class="n">new</span><span class="p">({</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">		<span class="n">title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&#34;Set custom obsidian address&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">		<span class="n">fields</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl">			<span class="p">{</span>
+</span></span><span class="line"><span class="ln">26</span><span class="cl">				<span class="n">text</span> <span class="o">=</span> <span class="n">obsidian_url_address</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">27</span><span class="cl">				<span class="n">input_type</span> <span class="o">=</span> <span class="s2">&#34;string&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl">				<span class="n">hint</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&#34;IP Address&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">29</span><span class="cl">			<span class="p">},</span>
+</span></span><span class="line"><span class="ln">30</span><span class="cl">			<span class="p">{</span>
+</span></span><span class="line"><span class="ln">31</span><span class="cl">				<span class="n">text</span> <span class="o">=</span> <span class="n">tostring</span><span class="p">(</span><span class="n">obsidian_url_port</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">32</span><span class="cl">				<span class="n">input_type</span> <span class="o">=</span> <span class="s2">&#34;number&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">33</span><span class="cl">				<span class="n">hint</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&#34;Port&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">34</span><span class="cl">			<span class="p">},</span>
+</span></span><span class="line"><span class="ln">35</span><span class="cl">		<span class="p">},</span>
+</span></span><span class="line"><span class="ln">36</span><span class="cl">		<span class="n">buttons</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">37</span><span class="cl">			<span class="p">{</span>
+</span></span><span class="line"><span class="ln">38</span><span class="cl">				<span class="p">{</span>
+</span></span><span class="line"><span class="ln">39</span><span class="cl">					<span class="n">text</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&#34;Cancel&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">40</span><span class="cl">					<span class="n">id</span> <span class="o">=</span> <span class="s2">&#34;close&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">41</span><span class="cl">					<span class="n">callback</span> <span class="o">=</span> <span class="kr">function</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">42</span><span class="cl">						<span class="n">UIManager</span><span class="p">:</span><span class="n">close</span><span class="p">(</span><span class="n">url_dialog</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">43</span><span class="cl">					<span class="kr">end</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">44</span><span class="cl">				<span class="p">},</span>
+</span></span><span class="line"><span class="ln">45</span><span class="cl">				<span class="p">{</span>
+</span></span><span class="line"><span class="ln">46</span><span class="cl">					<span class="n">text</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&#34;OK&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="ln">47</span><span class="cl">					<span class="n">callback</span> <span class="o">=</span> <span class="kr">function</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">48</span><span class="cl">						<span class="kd">local</span> <span class="n">fields</span> <span class="o">=</span> <span class="n">url_dialog</span><span class="p">:</span><span class="n">getFields</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">49</span><span class="cl">						<span class="kr">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">~=</span> <span class="s2">&#34;&#34;</span> <span class="kr">then</span>
+</span></span><span class="line"><span class="ln">50</span><span class="cl">							<span class="kd">local</span> <span class="n">port</span> <span class="o">=</span> <span class="n">tonumber</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+</span></span><span class="line"><span class="ln">51</span><span class="cl">							<span class="kr">if</span> <span class="ow">not</span> <span class="n">port</span> <span class="ow">or</span> <span class="n">port</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">port</span> <span class="o">&gt;</span> <span class="mi">65355</span> <span class="kr">then</span>
+</span></span><span class="line"><span class="ln">52</span><span class="cl">								<span class="n">port</span> <span class="o">=</span> <span class="n">ObsidianSync.defaults</span><span class="p">.</span><span class="n">port</span>
+</span></span><span class="line"><span class="ln">53</span><span class="cl">							<span class="kr">end</span>
+</span></span><span class="line"><span class="ln">54</span><span class="cl">
+</span></span><span class="line"><span class="ln">55</span><span class="cl">							<span class="c1">-- Preserves existing device_id when saving</span>
+</span></span><span class="line"><span class="ln">56</span><span class="cl">							<span class="kd">local</span> <span class="n">new_settings</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">57</span><span class="cl">								<span class="n">address</span> <span class="o">=</span> <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+</span></span><span class="line"><span class="ln">58</span><span class="cl">								<span class="n">port</span> <span class="o">=</span> <span class="n">port</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">59</span><span class="cl">								<span class="n">device_id</span> <span class="o">=</span> <span class="n">self.settings</span><span class="p">.</span><span class="n">device_id</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">60</span><span class="cl">							<span class="p">}</span>
+</span></span><span class="line"><span class="ln">61</span><span class="cl">							<span class="n">G_reader_settings</span><span class="p">:</span><span class="n">saveSetting</span><span class="p">(</span><span class="s2">&#34;obsidiansync_settings&#34;</span><span class="p">,</span> <span class="n">new_settings</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">62</span><span class="cl">							<span class="n">self.settings</span> <span class="o">=</span> <span class="n">new_settings</span>
+</span></span><span class="line"><span class="ln">63</span><span class="cl">							<span class="n">self</span><span class="p">:</span><span class="n">showNotification</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&#34;✅ Settings saved!&#34;</span><span class="p">))</span>
+</span></span><span class="line"><span class="ln">64</span><span class="cl">						<span class="kr">end</span>
+</span></span><span class="line"><span class="ln">65</span><span class="cl">						<span class="n">UIManager</span><span class="p">:</span><span class="n">close</span><span class="p">(</span><span class="n">url_dialog</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">66</span><span class="cl">						<span class="kr">if</span> <span class="n">touchmenu_instance</span> <span class="kr">then</span>
+</span></span><span class="line"><span class="ln">67</span><span class="cl">							<span class="n">touchmenu_instance</span><span class="p">:</span><span class="n">updateItems</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">68</span><span class="cl">						<span class="kr">end</span>
+</span></span><span class="line"><span class="ln">69</span><span class="cl">					<span class="kr">end</span><span class="p">,</span>
+</span></span><span class="line"><span class="ln">70</span><span class="cl">				<span class="p">},</span>
+</span></span><span class="line"><span class="ln">71</span><span class="cl">			<span class="p">},</span>
+</span></span><span class="line"><span class="ln">72</span><span class="cl">		<span class="p">},</span>
+</span></span><span class="line"><span class="ln">73</span><span class="cl">	<span class="p">})</span>
+</span></span><span class="line"><span class="ln">74</span><span class="cl">	<span class="n">UIManager</span><span class="p">:</span><span class="n">show</span><span class="p">(</span><span class="n">url_dialog</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">75</span><span class="cl">	<span class="n">url_dialog</span><span class="p">:</span><span class="n">onShowKeyboard</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">76</span><span class="cl"><span class="kr">end</span></span></span></code></pre></div><p>This method is responsible for creating the inputs and saving the data filled in by the user in a configuration file that persists independently of the current book or session.</p>
+<p>Now that we have the data for where to send the files, we can just grab the metadata and send it to the server — the metadata is basically an object (table) and we&rsquo;ll let the server handle which data it wants or not.</p>
+
+
+
+
+
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="kr">function</span> <span class="nc">ObsidianSync</span><span class="p">:</span><span class="nf">sendToServer</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">	<span class="kd">local</span> <span class="n">json</span> <span class="o">=</span> <span class="n">require</span><span class="p">(</span><span class="s2">&#34;json&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">	<span class="kd">local</span> <span class="n">metadata</span> <span class="o">=</span> <span class="n">self</span><span class="p">:</span><span class="n">getSDRData</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">	<span class="kr">if</span> <span class="ow">not</span> <span class="n">metadata</span> <span class="kr">then</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">		<span class="kr">return</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">	<span class="kr">end</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">	<span class="kd">local</span> <span class="n">body</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">json.encode</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">	<span class="kr">if</span> <span class="ow">not</span> <span class="n">body</span> <span class="kr">then</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">		<span class="n">self</span><span class="p">:</span><span class="n">showNotification</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&#34;❌ Error encoding JSON: &#34;</span><span class="p">)</span> <span class="o">..</span> <span class="p">(</span><span class="n">err</span> <span class="ow">or</span> <span class="n">_</span><span class="p">(</span><span class="s2">&#34;unknown&#34;</span><span class="p">)),</span> <span class="mi">5</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">		<span class="kr">return</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">	<span class="kr">end</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">
+</span></span><span class="line"><span class="ln">15</span><span class="cl">	<span class="kd">local</span> <span class="n">device_id</span> <span class="o">=</span> <span class="n">self</span><span class="p">:</span><span class="n">getDeviceID</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">	<span class="kr">if</span> <span class="ow">not</span> <span class="n">device_id</span> <span class="ow">or</span> <span class="n">device_id</span> <span class="o">==</span> <span class="s2">&#34;&#34;</span> <span class="kr">then</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">		<span class="n">self</span><span class="p">:</span><span class="n">showNotification</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&#34;❌ Error: Could not get device ID.&#34;</span><span class="p">),</span> <span class="mi">5</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl">		<span class="kr">return</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">	<span class="kr">end</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">
+</span></span><span class="line"><span class="ln">21</span><span class="cl">	<span class="kd">local</span> <span class="n">settings</span> <span class="o">=</span> <span class="n">self.settings</span> <span class="ow">or</span> <span class="n">G_reader_settings</span><span class="p">:</span><span class="n">readSetting</span><span class="p">(</span><span class="s2">&#34;obsidiansync_settings&#34;</span><span class="p">,</span> <span class="n">ObsidianSync.defaults</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">	<span class="kd">local</span> <span class="n">url</span> <span class="o">=</span> <span class="s2">&#34;http://&#34;</span> <span class="o">..</span> <span class="n">settings.address</span> <span class="o">..</span> <span class="s2">&#34;:&#34;</span> <span class="o">..</span> <span class="n">settings.port</span> <span class="o">..</span> <span class="s2">&#34;/sync&#34;</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">
+</span></span><span class="line"><span class="ln">24</span><span class="cl">	<span class="n">self</span><span class="p">:</span><span class="n">showNotification</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s2">&#34;Syncing with server...&#34;</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl">
+</span></span><span class="line"><span class="ln">26</span><span class="cl">	<span class="n">UIManager</span><span class="p">:</span><span class="n">scheduleIn</span><span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="kr">function</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">27</span><span class="cl">		<span class="n">self</span><span class="p">:</span><span class="n">_doSyncRequest</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">device_id</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl">	<span class="kr">end</span><span class="p">)</span>
+</span></span><span class="line"><span class="ln">29</span><span class="cl"><span class="kr">end</span></span></span></code></pre></div><p>Here we grab all the <em>metadata</em> and, with the user&rsquo;s saved settings, communicate with the server at the <strong><code>/sync</code></strong> route to complete the <em><strong>highlights</strong></em> <strong>sync</strong>.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>We&rsquo;ve reached the end of the <em>plugin</em> development (at least the KoReader part) and the complete code is available on my <em>github</em> in the <a href="https://github.com/breno5g/koreadersync.koplugin">koreadersync.koplugin</a> repository.</p>
+]]></content:encoded></item></channel></rss>
