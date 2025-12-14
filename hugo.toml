@@ -1,4 +1,50 @@
 baseURL = "https://blog.breno5g.dev/"
-languageCode = 'en-us'
-title = 'My New Hugo Site'
+title = "Blog | Breno5G"
 theme = "hugo-bearcub"
+
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = false
+languageCode = "en-US"
+
+copyright = "Breno Santos"
+
+enableRobotsTXT = true
+
+[markup]
+  [markup.highlight]
+    lineNos = true
+    lineNumbersInTable = false
+    noClasses = false
+
+[params]
+  description = "Um diário pessoal sobre programação, engenharia de software e ideias em andamento. Um espaço simples para escrever devagar, organizar pensamentos e registrar o processo."
+  dateFormat = "2006-01-02"
+  themeStyle = "original"
+  generateSocialCard = true
+
+  [params.social]
+    twitter = "breno5g"
+    github = "breno5g"
+
+  [params.author]
+    name = "Breno Santos"
+
+[languages]
+
+  [languages.en]
+    languageName = "en-US 🇺🇸"
+    weight = 1
+    contentDir = "content.en"
+    title = "Blog | Breno5G"
+
+    [languages.en.params]
+      madeWith = "Made with [Bear Cub](https://github.com/clente/hugo-bearcub)"
+
+  [languages.pt]
+    languageName = "pt-BR 🇧🇷"
+    weight = 2
+    contentDir = "content"
+    title = "Blog | Breno5G"
+
+    [languages.pt.params]
+      madeWith = "Feito com [Bear Cub](https://github.com/clente/hugo-bearcub)"
