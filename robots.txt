@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://blog.breno5g.dev/sitemap.xml
